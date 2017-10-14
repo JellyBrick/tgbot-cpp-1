@@ -36,6 +36,8 @@ find_package(Boost 1.59.0 COMPONENTS system)
 
 ### Old CMake compatability
 
+include(cmake/external-targets.cmake)
+
 if (NOT TARGET Threads::Threads)
     define_threads_target()
 endif ()
