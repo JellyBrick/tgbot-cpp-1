@@ -20,7 +20,7 @@ addons:
     - libboost-system-dev
 
 before_script:
-- cmake . -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=ON
+- cmake .
 
 script:
 - make -j2
