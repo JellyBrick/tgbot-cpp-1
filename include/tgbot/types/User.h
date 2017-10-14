@@ -56,6 +56,11 @@ public:
 	 * Optional. User‘s or bot’s username.
 	 */
 	std::string username;
+
+	/**
+	 * Optional. IETF language tag of the user's language.
+	 */
+	std::string languageCode;
 };
 
 }

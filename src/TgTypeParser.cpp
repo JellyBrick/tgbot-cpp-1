@@ -85,6 +85,7 @@ User::Ptr TgTypeParser::parseJsonAndGetUser(const ptree& data) const {
 	result->firstName = data.get<string>("first_name");
 	result->lastName = data.get("last_name", "");
 	result->username = data.get("username", "");
+	result->languageCode = data.get("language_code", "");
 	return result;
 }
 
@@ -98,6 +99,7 @@ string TgTypeParser::parseUser(const User::Ptr& object) const {
 	appendToJson(result, "first_name", object->firstName);
 	appendToJson(result, "last_name", object->lastName);
 	appendToJson(result, "username", object->username);
+	appendToJson(result, "language_code", object->languageCode);
 	result.erase(result.length() - 1);
 	result += '}';
 	return result;
