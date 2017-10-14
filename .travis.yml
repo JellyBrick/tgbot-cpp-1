@@ -7,7 +7,6 @@ compiler:
 branches:
   except:
   - /^.*-dev$/
-  - dev
 
 env:
   global:
@@ -19,16 +18,17 @@ addons:
     - libssl-dev
     - libboost-dev
     - libboost-system-dev
-    - libboost-iostreams-dev
 
 before_script:
-- mkdir build
-- cd build
-- cmake .. -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=ON
+- cmake . -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=ON
 
 script:
 - make -j2
-- make test
 
-# TODO:
-# Auto-publish documentation.
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch: master
+  local_dir: docs
