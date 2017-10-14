@@ -241,7 +241,7 @@ public:
      * @param replyMarkup Additional interface options. A object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
      * @return On success, the sent Message is returned.
      */
-    Message::Ptr sendVideoNote(int64_t charId, const InputFile::Ptr videoNote, int64_t replyToMessageId = 0, bool disableNotification = false,
+    Message::Ptr sendVideoNote(int64_t chatId, const InputFile::Ptr videoNote, int64_t replyToMessageId = 0, bool disableNotification = false,
                                int32_t duration = 0, int32_t length = 0, const GenericReply::Ptr replyMarkup = GenericReply::Ptr());
 
     /**
@@ -255,7 +255,7 @@ public:
      * @param replyMarkup Additional interface options. A object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
      * @return On success, the sent Message is returned.
      */
-    Message::Ptr sendVideoNote(int64_t charId, const std::string &videoNote, int64_t replyToMessageId = 0, bool disableNotification = false,
+    Message::Ptr sendVideoNote(int64_t chatId, const std::string &videoNote, int64_t replyToMessageId = 0, bool disableNotification = false,
                                int32_t duration = 0, int32_t length = 0, const GenericReply::Ptr replyMarkup = GenericReply::Ptr());
 
 	/**
