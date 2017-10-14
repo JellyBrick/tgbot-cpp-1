@@ -171,9 +171,9 @@ public:
 	Venue::Ptr venue;
 
 	/**
-	 * Optional. A new member was added to the group, information about them (this member may be bot itself).
+	 * Optional. New members that were added to the group or supergroup and information about them (the bot itself may be one of these members)
 	 */
-	User::Ptr newChatMember;
+	std::vector<User::Ptr> newChatMembers;
 
 	/**
 	 * Optional. A member was removed from the group, information about them (this member may be bot itself).

@@ -85,6 +85,7 @@ User::Ptr TgTypeParser::parseJsonAndGetUser(const ptree& data) const {
 	result->firstName = data.get<string>("first_name");
 	result->lastName = data.get("last_name", "");
 	result->username = data.get("username", "");
+	result->languageCode = data.get("language_code", "");
 	return result;
 }
 
@@ -98,6 +99,7 @@ string TgTypeParser::parseUser(const User::Ptr& object) const {
 	appendToJson(result, "first_name", object->firstName);
 	appendToJson(result, "last_name", object->lastName);
 	appendToJson(result, "username", object->username);
+	appendToJson(result, "language_code", object->languageCode);
 	result.erase(result.length() - 1);
 	result += '}';
 	return result;
@@ -134,8 +136,8 @@ Message::Ptr TgTypeParser::parseJsonAndGetMessage(const ptree& data) const {
 	result->video = tryParseJson<Video>(&TgTypeParser::parseJsonAndGetVideo, data, "video");
 	result->contact = tryParseJson<Contact>(&TgTypeParser::parseJsonAndGetContact, data, "contact");
 	result->location = tryParseJson<Location>(&TgTypeParser::parseJsonAndGetLocation, data, "location");
-	result->newChatMember = tryParseJson<User>(&TgTypeParser::parseJsonAndGetUser, data, "new_chat_participant");
-	result->leftChatMember = tryParseJson<User>(&TgTypeParser::parseJsonAndGetUser, data, "left_chat_participant");
+	result->newChatMembers = parseJsonAndGetArray<User>(&TgTypeParser::parseJsonAndGetUser, data, "new_chat_members");
+	result->leftChatMember = tryParseJson<User>(&TgTypeParser::parseJsonAndGetUser, data, "left_chat_member");
 	result->newChatTitle = data.get("new_chat_title", "");
 	result->newChatPhoto = parseJsonAndGetArray<PhotoSize>(&TgTypeParser::parseJsonAndGetPhotoSize, data, "new_chat_photo");
 	result->deleteChatPhoto = data.get("delete_chat_photo", false);
@@ -172,7 +174,7 @@ string TgTypeParser::parseMessage(const Message::Ptr& object) const {
 	appendToJson(result, "video", parseVideo(object->video));
 	appendToJson(result, "contact", parseContact(object->contact));
 	appendToJson(result, "location", parseLocation(object->location));
-	appendToJson(result, "new_chat_member", parseUser(object->newChatMember));
+	appendToJson(result, "new_chat_member", parseArray(&TgTypeParser::parseUser, object->newChatMembers));
 	appendToJson(result, "left_chat_member", parseUser(object->leftChatMember));
 	appendToJson(result, "new_chat_title", object->newChatTitle);
 	appendToJson(result, "new_chat_photo", parseArray(&TgTypeParser::parsePhotoSize, object->newChatPhoto));
@@ -321,6 +323,33 @@ string TgTypeParser::parseVideo(const Video::Ptr& object) const {
 	result += '}';
 	return result;
 }
+
+VideoNote::Ptr TgTypeParser::parseJsonAndGetVideoNote(const ptree& data) const {
+	VideoNote::Ptr result(new VideoNote);
+	result->fileId = data.get<string>("file_id");
+	result->length = data.get<int32_t>("length");
+	result->duration = data.get<int32_t>("duration");
+	result->thumb = tryParseJson<PhotoSize>(&TgTypeParser::parseJsonAndGetPhotoSize, data, "thumb");
+	result->fileSize = data.get("file_size", 0);
+	return result;
+}
+
+string TgTypeParser::parseVideoNote(const VideoNote::Ptr& object) const {
+	if (!object) {
+	    return "";
+	}
+	string result;
+	result += '{';
+	appendToJson(result, "file_id", object->fileId);
+	appendToJson(result, "length", object->length);
+	appendToJson(result, "duration", object->duration);
+	appendToJson(result, "thumb", parsePhotoSize(object->thumb));
+	appendToJson(result, "file_size", object->fileSize);
+	result += '}';
+	result.erase();
+	return result;
+}
+
 
 Contact::Ptr TgTypeParser::parseJsonAndGetContact(const ptree& data) const {
 	Contact::Ptr result(new Contact);
@@ -1178,6 +1207,7 @@ InlineQueryResultGif::Ptr TgTypeParser::parseJsonAndGetInlineQueryResultGif(cons
 	result->gifUrl = data.get<string>("gif_url", "");
 	result->gifWidth = data.get("gif_width", 0);
 	result->gifHeight = data.get("gif_height", 0);
+	result->gifDuration = data.get("gif_duration", 0);
 	result->thumbUrl = data.get<string>("thumb_url");
 	return result;
 }
@@ -1191,6 +1221,7 @@ std::string TgTypeParser::parseInlineQueryResultGif(const InlineQueryResultGif::
 	appendToJson(result, "gif_url", object->gifUrl);
 	appendToJson(result, "gif_width", object->gifWidth);
 	appendToJson(result, "gif_height", object->gifHeight);
+	appendToJson(result, "gif_duration", object->gifDuration);
 	appendToJson(result, "thumb_url", object->thumbUrl);
 	// The last comma will be erased by parseInlineQueryResult().
 	return result;
@@ -1202,6 +1233,7 @@ InlineQueryResultMpeg4Gif::Ptr TgTypeParser::parseJsonAndGetInlineQueryResultMpe
 	result->mpeg4Url = data.get<string>("mpeg4_url");
 	result->mpeg4Width = data.get("mpeg4_width", 0);
 	result->mpeg4Height = data.get("mpeg4_height", 0);
+	result->mpeg4Duration = data.get("mpeg4_duration", 0);
 	result->thumbUrl = data.get<string>("thumb_url");
 	return result;
 }
@@ -1216,6 +1248,7 @@ std::string TgTypeParser::parseInlineQueryResultMpeg4Gif(const InlineQueryResult
 	appendToJson(result, "mpeg4_url", object->mpeg4Url);
 	appendToJson(result, "mpeg4_width", object->mpeg4Width);
 	appendToJson(result, "mpeg4_height", object->mpeg4Height);
+	appendToJson(result, "mpeg4_duration", object->mpeg4Duration);
 	appendToJson(result, "thumb_url", object->thumbUrl);
 	// The last comma will be erased by parseInlineQueryResult().
 	return result;
