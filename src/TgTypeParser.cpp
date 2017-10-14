@@ -1180,6 +1180,7 @@ InlineQueryResultGif::Ptr TgTypeParser::parseJsonAndGetInlineQueryResultGif(cons
 	result->gifUrl = data.get<string>("gif_url", "");
 	result->gifWidth = data.get("gif_width", 0);
 	result->gifHeight = data.get("gif_height", 0);
+	result->gifDuration = data.get("gif_duration", 0);
 	result->thumbUrl = data.get<string>("thumb_url");
 	return result;
 }
@@ -1193,6 +1194,7 @@ std::string TgTypeParser::parseInlineQueryResultGif(const InlineQueryResultGif::
 	appendToJson(result, "gif_url", object->gifUrl);
 	appendToJson(result, "gif_width", object->gifWidth);
 	appendToJson(result, "gif_height", object->gifHeight);
+	appendToJson(result, "gif_duration", object->gifDuration);
 	appendToJson(result, "thumb_url", object->thumbUrl);
 	// The last comma will be erased by parseInlineQueryResult().
 	return result;
@@ -1204,6 +1206,7 @@ InlineQueryResultMpeg4Gif::Ptr TgTypeParser::parseJsonAndGetInlineQueryResultMpe
 	result->mpeg4Url = data.get<string>("mpeg4_url");
 	result->mpeg4Width = data.get("mpeg4_width", 0);
 	result->mpeg4Height = data.get("mpeg4_height", 0);
+	result->mpeg4Duration = data.get("mpeg4_duration", 0);
 	result->thumbUrl = data.get<string>("thumb_url");
 	return result;
 }
@@ -1218,6 +1221,7 @@ std::string TgTypeParser::parseInlineQueryResultMpeg4Gif(const InlineQueryResult
 	appendToJson(result, "mpeg4_url", object->mpeg4Url);
 	appendToJson(result, "mpeg4_width", object->mpeg4Width);
 	appendToJson(result, "mpeg4_height", object->mpeg4Height);
+	appendToJson(result, "mpeg4_duration", object->mpeg4Duration);
 	appendToJson(result, "thumb_url", object->thumbUrl);
 	// The last comma will be erased by parseInlineQueryResult().
 	return result;
