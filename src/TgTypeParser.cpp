@@ -324,6 +324,33 @@ string TgTypeParser::parseVideo(const Video::Ptr& object) const {
 	return result;
 }
 
+VideoNote::Ptr TgTypeParser::parseJsonAndGetVideoNote(const ptree& data) const {
+	VideoNote::Ptr result(new VideoNote);
+	result->fileId = data.get<string>("file_id");
+	result->length = data.get<int32_t>("length");
+	result->duration = data.get<int32_t>("duration");
+	result->thumb = tryParseJson<PhotoSize>(&TgTypeParser::parseJsonAndGetPhotoSize, data, "thumb");
+	result->fileSize = data.get("file_size", 0);
+	return result;
+}
+
+string TgTypeParser::parseVideoNote(const VideoNote::Ptr& object) const {
+	if (!object) {
+	    return "";
+	}
+	string result;
+	result += '{';
+	appendToJson(result, "file_id", object->fileId);
+	appendToJson(result, "length", object->length);
+	appendToJson(result, "duration", object->duration);
+	appendToJson(result, "thumb", parsePhotoSize(object->thumb));
+	appendToJson(result, "file_size", object->fileSize);
+	result += '}';
+	result.erase();
+	return result;
+}
+
+
 Contact::Ptr TgTypeParser::parseJsonAndGetContact(const ptree& data) const {
 	Contact::Ptr result(new Contact);
 	result->phoneNumber = data.get<string>("phone_number");

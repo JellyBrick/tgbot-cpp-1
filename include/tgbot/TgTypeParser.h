@@ -36,6 +36,7 @@
 #include "tgbot/types/Document.h"
 #include "tgbot/types/Sticker.h"
 #include "tgbot/types/Video.h"
+#include "tgbot/types/VideoNote.h"
 #include "tgbot/types/Contact.h"
 #include "tgbot/types/Location.h"
 #include "tgbot/types/Update.h"
@@ -111,6 +112,8 @@ public:
 	std::string parseSticker(const Sticker::Ptr& object) const;
 	Video::Ptr parseJsonAndGetVideo(const boost::property_tree::ptree& data) const;
 	std::string parseVideo(const Video::Ptr& object) const;
+	VideoNote::Ptr parseJsonAndGetVideoNote(const boost::property_tree::ptree& data) const;
+	std::string parseVideoNote(const VideoNote::Ptr& object) const;
 	Contact::Ptr parseJsonAndGetContact(const boost::property_tree::ptree& data) const;
 	std::string parseContact(const Contact::Ptr& object) const;
 	Location::Ptr parseJsonAndGetLocation(const boost::property_tree::ptree& data) const;
