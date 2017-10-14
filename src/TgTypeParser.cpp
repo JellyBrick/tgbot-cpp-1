@@ -136,8 +136,8 @@ Message::Ptr TgTypeParser::parseJsonAndGetMessage(const ptree& data) const {
 	result->video = tryParseJson<Video>(&TgTypeParser::parseJsonAndGetVideo, data, "video");
 	result->contact = tryParseJson<Contact>(&TgTypeParser::parseJsonAndGetContact, data, "contact");
 	result->location = tryParseJson<Location>(&TgTypeParser::parseJsonAndGetLocation, data, "location");
-	result->newChatMember = tryParseJson<User>(&TgTypeParser::parseJsonAndGetUser, data, "new_chat_participant");
-	result->leftChatMember = tryParseJson<User>(&TgTypeParser::parseJsonAndGetUser, data, "left_chat_participant");
+	result->newChatMembers = parseJsonAndGetArray<User>(&TgTypeParser::parseJsonAndGetUser, data, "new_chat_members");
+	result->leftChatMember = tryParseJson<User>(&TgTypeParser::parseJsonAndGetUser, data, "left_chat_member");
 	result->newChatTitle = data.get("new_chat_title", "");
 	result->newChatPhoto = parseJsonAndGetArray<PhotoSize>(&TgTypeParser::parseJsonAndGetPhotoSize, data, "new_chat_photo");
 	result->deleteChatPhoto = data.get("delete_chat_photo", false);
@@ -174,7 +174,7 @@ string TgTypeParser::parseMessage(const Message::Ptr& object) const {
 	appendToJson(result, "video", parseVideo(object->video));
 	appendToJson(result, "contact", parseContact(object->contact));
 	appendToJson(result, "location", parseLocation(object->location));
-	appendToJson(result, "new_chat_member", parseUser(object->newChatMember));
+	appendToJson(result, "new_chat_member", parseArray(&TgTypeParser::parseUser, object->newChatMembers));
 	appendToJson(result, "left_chat_member", parseUser(object->leftChatMember));
 	appendToJson(result, "new_chat_title", object->newChatTitle);
 	appendToJson(result, "new_chat_photo", parseArray(&TgTypeParser::parsePhotoSize, object->newChatPhoto));
