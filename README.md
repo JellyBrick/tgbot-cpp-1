@@ -6,16 +6,32 @@
 
 C++ library for Telegram bot API.
 
-Documentation is located [here](http://foxcpp.github.io/tgbot-cpp).
+**NOTE: Library is under massive reconstruction. Expect backwards-incompatible changes!**
 
-## Library compilation
+## API support
 
-Firstly you need to install some dependencies such as Boost and build tools such as CMake. On Debian-based distibutives you can do it with these commands:
+- [x] Bot API 2.3.1
+- [x] Bot API 3.0 (everything except payments)
+- [ ] Bot API 3.1
+- [ ] Bot API 3.2
+- [ ] Bot API 3.3
+- [ ] Bot API 3.4
+
+## Requirements
+
+* CMake 3.2+
+* Boost 1.59+ 
+  system compomnent for library; regex, iostreams, unit\_test\_framework for tests.
+* OpenSSL
+
+Following should be enough on Debian-based distros:
 ```sh
 sudo apt-get install g++ make binutils cmake libssl-dev libboost-system-dev
 ```
 
-To compile the library execute this commands:
+
+## Compilaton
+
 ```sh
 git clone https://github.com/foxcpp/tgbot-cpp
 cd tgbot-cpp
@@ -24,12 +40,27 @@ cmake ..
 make
 ```
 
+
 ## Bot compilation
 
-### With CMake
-[Example CMakeLists.txt](samples/echobot/CMakeLists.txt)
+#### System library
+```cmake
+find_package(tgbot-cpp REQUIRED)
 
-## Samples
+add_executable(bot-exe-name file.cpp)
+target_link_libraries(bot-exe-name tgbot)
+```
+
+#### Submodule
+```cmake
+add_subdirectory(tgbot-cpp/) # Make sure it points to directory where you placed tgbot-cpp
+
+add_executable(bot-exe-name files.cpp)
+target_link_libraries(bot-exe-name tgbot)
+```
+
+
+## Examples
 
 Simple echo bot which sends everything it receives:
 ```cpp
@@ -62,10 +93,12 @@ int main() {
 }
 ```
 
-All samples are located [here](samples).
+For more advanced examples see [examples/](examples)
 
-## Feedback
-Feel free to [create new issues on GitHub](https://github.com/foxcpp/tgbot-cpp/issues).
+## Contributing
+
+PRs, issues, questions are welcome!
 
 ## Licence
+
 [The MIT License](http://opensource.org/licenses/MIT).

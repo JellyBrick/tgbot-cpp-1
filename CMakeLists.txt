@@ -1,13 +1,17 @@
-cmake_minimum_required(VERSION 2.8.4)
-project(TgBot)
+cmake_minimum_required(VERSION 3.2)
+project(TGBOT
+        LANGUAGES CXX
+        VERSION 0.0.1
+        )
 
-### options
-option(ENABLE_TESTS "Set to ON to enable building of tests" OFF)
+### Configuration
 
-### sources
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-include_directories(include)
-set(SRC_LIST
+option(TGBOT_ENABLE_TESTS "Enable building of tests" OFF)
+
+
+### Sources
+
+set(TGBOT_SOURCES
 	src/Api.cpp
 	src/TgTypeParser.cpp
 	src/TgException.cpp
@@ -19,41 +23,118 @@ set(SRC_LIST
 	src/tools/StringTools.cpp
 	src/tools/FileTools.cpp
 	src/types/InlineQueryResult.cpp
-	src/types/InputFile.cpp
-)
+	src/types/InputFile.cpp)
 
-### libs
-# threads
-find_package(Threads REQUIRED)
 
-# openssl
-find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
-
-# boost
+### Dependencies
 set(Boost_USE_MULTITHREADED ON)
-if (ENABLE_TESTS)
-	find_package(Boost 1.59.0 COMPONENTS system iostreams unit_test_framework REQUIRED)
-else()
-	find_package(Boost 1.59.0 COMPONENTS system iostreams REQUIRED)
+
+find_package(Threads REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(Boost 1.59.0 COMPONENTS system)
+
+
+### Old CMake compatability
+
+if (NOT TARGET Threads::Threads)
+    define_threads_target()
+endif ()
+
+if (NOT TARGET Boost::system)
+    define_boost_target(system)
+endif ()
+
+if (NOT TARGET OpenSSL::SSL)
+    define_openssl_ssl_target()
+    define_openssl_crypto_target()
+endif ()
+
+
+### Library
+
+add_library(tgbot ${TGBOT_SOURCES})
+target_link_libraries(tgbot Threads::Threads Boost::system OpenSSL::SSL OpenSSL::Crypto)
+target_include_directories(tgbot PUBLIC
+        $<BUILD_INTERFACE:${TGBOT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/>)
+
+set_property(TARGET tgbot PROPERTY CXX_STANDARD 11)
+set_property(TARGET tgbot PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET tgbot PROPERTY CXX_STANDARD_EXTENSIONS OFF)
+
+
+### Installation
+
+install(TARGETS tgbot
+        DESTINATION lib
+        EXPORT tgbot-cpp-targets)
+
+install(DIRECTORY "${TGBOT_SOURCE_DIR}/include/"
+        DESTINATION include)
+
+install(EXPORT tgbot-cpp-targets
+        DESTINATION lib/cmake/tgbot-cpp)
+
+install(FILES ${TGBOT_SOURCE_DIR}/cmake/tgbot-cpp-config.cmake
+        DESTINATION lib/cmake/tgbot-cpp)
+
+
+### Documentation
+
+find_package(Doxygen)
+
+option(TGBOT_DOCS "Generate HTML documentation (Doxygen)"     ${DOXYGEN_FOUND})
+
+if(TGBOT_DOCS)
+    if (NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "Doxygen is required to build documentation.")
+    endif()
+
+    if(DOXYGEN_DOT_FOUND)
+        file(TO_NATIVE_PATH "${DOXYGEN_DOT_EXECUTABLE}" DOXYGEN_DOT_EXECUTABLE_)
+        set(DOXYGEN_DOT_FOUND_ "YES")
+    endif()
+
+    configure_file(${TGBOT_SOURCE_DIR}/cmake/Doxyfile.in ${TGBOT_BINARY_DIR}/Doxyfile @ONLY)
+
+    add_custom_command(OUTPUT ${TGBOT_BINARY_DIR}/docs
+                       COMMAND ${DOXYGEN_EXECUTABLE} ${TGBOT_BINARY_DIR}/Doxyfile
+                       WORKING_DIRECTORY ${TGBOT_BINARY_DIR}
+                       COMMENT "Generating HTML documentation using Doxygen"
+                       DEPENDS ${TGBOT_HEADERS} ${TGBOT_SOURCE_DIR}/cmake/Doxyfile.in ${TGBOT_SOURCE_DIR}/README.md
+                       VERBATIM)
+
+    add_custom_target(doc ALL
+                      DEPENDS ${TGBOT_BINARY_DIR}/docs)
+
+    install(DIRECTORY ${TGBOT_BINARY_DIR}/docs/ DESTINATION share/doc/tgbot)
 endif()
-include_directories(${Boost_INCLUDE_DIR})
 
-set(LIB_LIST
-	${CMAKE_THREAD_LIBS_INIT}
-	${OPENSSL_LIBRARIES}
-	${Boost_LIBRARIES}
-)
 
-### building project
-add_library(${PROJECT_NAME} ${SRC_LIST})
-target_link_libraries(${PROJECT_NAME} ${LIB_LIST})
-install(TARGETS ${PROJECT_NAME} DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include)
+### Examples
 
-### tests
-if (ENABLE_TESTS)
-	message(STATUS "Building of tests is enabled")
+option(TGBOT_EXAMPLES "Build examples." OFF)
+
+if(TGBOT_EXAMPLES)
+    file(GLOB EXAMPLES
+         LIST_DIRECTORIES TRUE
+         RELATIVE ${TGBOT_SOURCE_DIR}/examples
+         ${TGBOT_SOURCE_DIR}/examples/*/)
+
+    foreach(example ${EXAMPLES})
+        if (IS_DIRECTORY ${TGBOT_SOURCE_DIR}/examples/${example})
+            message(STATUS "Example: ${example}")
+
+            add_subdirectory(${TGBOT_SOURCE_DIR}/examples/${example})
+        endif()
+    endforeach()
+endif()
+
+
+### Tests
+
+if (TGBOT_ENABLE_TESTS)
 	enable_testing()
 	add_subdirectory(test)
-endif()
+endif ()
+
