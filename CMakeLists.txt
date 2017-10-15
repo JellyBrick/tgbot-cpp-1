@@ -38,15 +38,21 @@ find_package(Boost 1.59.0 COMPONENTS system)
 
 include(cmake/external-targets.cmake)
 
+set(THREADS_INTERFACE_TARGET OFF)
 if (NOT TARGET Threads::Threads)
+	set(THREADS_INTERFACE_TARGET ON)
     define_threads_target()
 endif ()
 
+set(BOOST_INTERFACE_TARGET OFF)
 if (NOT TARGET Boost::system)
+	set(BOOST_INTERFACE_TARGET ON)
     define_boost_target(system)
 endif ()
 
+set(SSL_INTERFACE_TARGET OFF)
 if (NOT TARGET OpenSSL::SSL)
+	set(SSL_INTERFACE_TARGET ON)
     define_openssl_ssl_target()
     define_openssl_crypto_target()
 endif ()
@@ -71,8 +77,15 @@ install(TARGETS tgbot
         DESTINATION lib
         EXPORT tgbot-cpp-targets)
 
-install(TARGETS __Boost_system __OpenSSL_SSL __OpenSSL_Crypto
-        EXPORT tgbot-cpp-targets)
+if (SSL_INTERFACE_TARGET)
+	install(TARGETS __OpenSSL_SSL __OpenSSL_Crypto
+			EXPORT tgbot-cpp-targets)
+endif ()
+
+if (BOOST_INTERFACE_TARGET)
+	install(TARGETS __Boost_system
+			EXPORT tgbot-cpp-targets)
+endif ()
 
 install(DIRECTORY "${TGBOT_SOURCE_DIR}/include/"
         DESTINATION include)
