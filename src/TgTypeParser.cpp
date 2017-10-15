@@ -1573,6 +1573,203 @@ std::string TgTypeParser::parseInputContactMessageContent(const InputContactMess
 	return result;
 }
 
+Invoice::Ptr TgTypeParser::parseJsonAndGetInvoice(const boost::property_tree::ptree& data) const {
+	Invoice::Ptr result(new Invoice);
+	result->title = data.get<string>("title");
+	result->description = data.get<string>("description");
+	result->startParameter = data.get<string>("start_parameter");
+	result->currency = data.get<string>("currency");
+	result->totalAmount = data.get<int32_t>("total_amount");
+	return result;
+}
+
+std::string TgTypeParser::parseInvoice(const Invoice::Ptr& object) const {
+	if (!object) {
+		return " ";
+	}
+	string result;
+	result += '{';
+	appendToJson(result, "title", object->title);
+	appendToJson(result, "description", object->description);
+	appendToJson(result, "start_parameter", object->startParameter);
+	appendToJson(result, "currency", object->currency);
+	appendToJson(result, "total_amount", object->totalAmount);
+	result.erase(result.length() - 1);
+	result += '}';
+	return result;
+}
+
+LabeledPrice::Ptr TgTypeParser::parseJsonAndGetLabeledPrice(const boost::property_tree::ptree& data) const {
+	LabeledPrice::Ptr result(new LabeledPrice);
+	result->label  = data.get<string>("label");
+	result->amount = data.get<int32_t>("amount");
+	return result;
+}
+
+string TgTypeParser::parseLabeledPrice(const LabeledPrice::Ptr& object) const {
+	std::string result;
+	result += '{';
+	appendToJson(result, "label", object->label);
+	appendToJson(result, "amount", object->amount);
+	result.erase(result.length() - 1);
+	result += '}';
+	return result;
+}
+
+OrderInfo::Ptr TgTypeParser::parseJsonAndGetOrderInfo(const boost::property_tree::ptree& data) const {
+	OrderInfo::Ptr result(new OrderInfo);
+	result->name = data.get<string>("name", "");
+	result->phoneNumber = data.get<string>("phone_number", "");
+	result->email = data.get<string>("email", "");
+	result->shippingAddress = tryParseJson(&TgTypeParser::parseJsonAndGetShippingAddress, data, "shipping_address");
+	return result;
+}
+
+string TgTypeParser::parseOrderInfo(const OrderInfo::Ptr& object) const {
+	if (!object) {
+		return " ";
+	}
+	std::string result;
+	result += '{';
+	if (!object->name.empty()) {
+		appendToJson(result, "name", object->name);
+	}
+	if (!object->phoneNumber.empty()) {
+		appendToJson(result, "phone_number", object->phoneNumber);
+	}
+	if (!object->email.empty()) {
+		appendToJson(result, "email", object->email);
+	}
+	if (!object->shippingAddress) {
+		result += R"("shipping_address":)";
+		result += parseShippingAddress(object->shippingAddress);
+		result += ",";
+	}
+	result.erase(result.length() - 1);
+	result += '}';
+	return result;
+}
+
+PreCheckoutQuery::Ptr TgTypeParser::parseJsonAndGetPreCheckoutQuery(const boost::property_tree::ptree& data) const {
+	PreCheckoutQuery::Ptr result(new PreCheckoutQuery);
+	result->id = data.get<string>("id");
+	result->from = tryParseJson(&TgTypeParser::parseJsonAndGetUser, data, "user");
+	result->currency = data.get<string>("currency");
+	result->totalAmount = data.get<int32_t>("total_amount");
+	return result;
+}
+
+string TgTypeParser::parsePreCheckoutQuery(const PreCheckoutQuery::Ptr& object) const {
+	std::string result;
+	result += '{';
+	appendToJson(result, "id", object->id);
+	result += R"("user":)";
+	result += parseUser(object->from);
+	result += ",";
+	appendToJson(result, "currency", object->currency);
+	appendToJson(result, "total_amount", object->totalAmount);
+	result.erase(result.length() - 1);
+	result += '}';
+	return result;
+}
+
+ShippingAddress::Ptr TgTypeParser::parseJsonAndGetShippingAddress(const boost::property_tree::ptree& data) const {
+	ShippingAddress::Ptr result;
+	result->countryCode = data.get<string>("country_code");
+	result->state = data.get<string>("state", "");
+	result->city = data.get<string>("city");
+	result->streetLine1 = data.get<string>("street_line1");
+	result->streetLine2 = data.get<string>("street_line2");
+	result->postCode = data.get<string>("post_code");
+	return result;
+}
+
+string TgTypeParser::parseShippingAddress(const ShippingAddress::Ptr& object) const {
+	std::string result;
+	result += '{';
+	appendToJson(result, "country_code", object->countryCode);
+	if (!object->state.empty()) {
+		appendToJson(result, "state", object->state);
+	}
+	appendToJson(result, "city", object->city);
+	appendToJson(result, "street_line1", object->streetLine1);
+	appendToJson(result, "street_line2", object->streetLine2);
+	appendToJson(result, "post_code", object->postCode);
+	result.erase(result.length() - 1);
+	result += '}';
+	return result;
+}
+
+ShippingOption::Ptr TgTypeParser::parseJsonAndGetShippingOption(const boost::property_tree::ptree& data) const {
+	ShippingOption::Ptr result(new ShippingOption);
+	result->id = data.get<string>("id");
+	result->title = data.get<string>("title");
+	result->prices = parseJsonAndGetArray<LabeledPrice>(&TgTypeParser::parseJsonAndGetLabeledPrice, data, "prices");
+	return result;
+}
+
+string TgTypeParser::parseShippingOption(const ShippingOption::Ptr& object) const {
+	std::string result;
+	result += '{';
+	appendToJson(result, "id", object->id);
+	appendToJson(result, "title", object->title);
+	result.erase(result.length() - 1);
+	result += R"("prices":)";
+	result += parseArray(&TgTypeParser::parseLabeledPrice, object->prices);
+	result += '}';
+	return result;
+}
+
+ShippingQuery::Ptr TgTypeParser::parseJsonAndGetShippingQuery(const boost::property_tree::ptree& data) const {
+	ShippingQuery::Ptr result(new ShippingQuery);
+	result->id = data.get<string>("id");
+	result->from = tryParseJson(&TgTypeParser::parseJsonAndGetUser, data, "from");
+	result->invoicePayload = data.get<string>("invoice_payload");
+	result->shippingAddress = tryParseJson(&TgTypeParser::parseJsonAndGetShippingAddress, data, "shipping_address");
+	return result;
+}
+
+string TgTypeParser::parseShippingQuery(const ShippingQuery::Ptr& object) const {
+	string result;
+	result += '{';
+	appendToJson(result, "id", object->id);
+	result += R"("from":)";
+	result += parseUser(object->from);
+	result += ",";
+	appendToJson(result, "invoice_payload", object->invoicePayload);
+	result += R"("shipping_address":)";
+	result += parseShippingAddress(object->shippingAddress);
+	result += ",";
+	result.erase(result.length() - 1);
+	result += '}';
+	return result;
+}
+
+SuccessfulPayment::Ptr TgTypeParser::parseJsonAndGetSucessfulPayment(const boost::property_tree::ptree& data) const {
+	SuccessfulPayment::Ptr result(new SuccessfulPayment);
+	result->currency = data.get<string>("currency");
+	result->totalAmount = data.get<int32_t>("total_amount");
+	result->invoicePayload = data.get<string>("invoice_payload");
+	result->shippingOptionId = data.get<string>("shipping_option_id");
+	result->orderInfo = tryParseJson(&TgTypeParser::parseJsonAndGetOrderInfo, data, "order_info");
+	return result;
+}
+
+std::string TgTypeParser::parseSucessfulPayment(const SuccessfulPayment::Ptr& object) const {
+	string result;
+	result += '{';
+	appendToJson(result, "currency", object->currency);
+	appendToJson(result, "total_amount", object->totalAmount);
+	appendToJson(result, "invoice_payload", object->invoicePayload);
+	appendToJson(result, "shipping_option_id", object->shippingOptionId);
+	result += R"("order_info":)";
+	result += parseOrderInfo(object->orderInfo);
+	result += ",";
+	result.erase(result.length() - 1);
+	result += '}';
+	return result;
+}
+
 void TgTypeParser::appendToJson(string& json, const string& varName, const string& value) const {
 	if (value.empty()) {
 		return;

@@ -21,7 +21,7 @@ namespace TgBot {
  */
 class ShippingOption {
 public:
-    typedef std::shared_ptr<ShippingOption> ptr;
+    typedef std::shared_ptr<ShippingOption> Ptr;
 
     /**
      * @brief Shipping option identifier.
@@ -36,7 +36,7 @@ public:
     /**
      * @brief List of price options.
      */
-    std::vector<LabeledPrice::ptr> prices;
+    std::vector<LabeledPrice::Ptr> prices;
 };
 }
 
