@@ -14,10 +14,13 @@ env:
 
 addons:
   apt:
+    sources:
+    - debian-sid
     packages:
-    - libssl-dev
-    - libboost-dev
-    - libboost-system-dev
+    - libssl1.0-dev
+    - libboost1.61-dev
+    - libboost-system1.61-dev
+    - libboost-iostreams1.61-dev
 
 before_script:
 - cmake .

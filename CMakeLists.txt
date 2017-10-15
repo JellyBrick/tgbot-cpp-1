@@ -71,6 +71,9 @@ install(TARGETS tgbot
         DESTINATION lib
         EXPORT tgbot-cpp-targets)
 
+install(TARGETS __Boost_system __OpenSSL_SSL __OpenSSL_Crypto
+        EXPORT tgbot-cpp-targets)
+
 install(DIRECTORY "${TGBOT_SOURCE_DIR}/include/"
         DESTINATION include)
 

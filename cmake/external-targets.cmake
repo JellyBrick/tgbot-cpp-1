@@ -13,7 +13,7 @@ macro(define_openssl_crypto_target)
         # FindOpenSSL prior to 3.2 doesn't provides separate variable libcrypto
         target_link_libraries(__OpenSSL_Crypto INTERFACE ${OPENSSL_LIBRARIES})
     else()
-        target_link_libraries(__OpenSSL_Crypto SYSTEM INTERFACE ${OPENSSL_CRYPTO_LIBRARY})
+        target_link_libraries(__OpenSSL_Crypto INTERFACE ${OPENSSL_CRYPTO_LIBRARY})
     endif()
 
     add_library(OpenSSL::Crypto ALIAS __OpenSSL_Crypto)
